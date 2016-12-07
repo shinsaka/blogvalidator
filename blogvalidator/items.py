@@ -6,3 +6,4 @@ class BlogArticle(scrapy.Item):
     url = scrapy.Field()
     image_urls = scrapy.Field()
     images = scrapy.Field()
+    result_images = scrapy.Field()

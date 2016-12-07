@@ -8,6 +8,12 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import os
+from dotenv import load_dotenv, find_dotenv
+
+
+load_dotenv(find_dotenv())
+VISION_API_KEY = os.getenv('vision_api_key', '')
 
 BOT_NAME = 'blogvalidator'
 
@@ -66,7 +72,7 @@ ROBOTSTXT_OBEY = True
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'scrapy.pipelines.images.ImagesPipeline': 1,
-#    'blogvalidator.pipelines.SomePipeline': 300,
+    'blogvalidator.pipelines.SafeValidatorPipeline': 5,
 }
 IMAGES_STORE = './image_store'
 
