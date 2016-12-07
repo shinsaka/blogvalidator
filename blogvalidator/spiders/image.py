@@ -14,6 +14,11 @@ class ImageSpider(scrapy.Spider):
             article_url = article.css('h1 > a::attr("href")').extract_first()
             yield scrapy.Request(article_url, callback=self.parse_article_page)
 
+        next_page_url = response.css('div.nav_to_paged > a::attr("href")').extract_first()
+        if next_page_url:
+            yield scrapy.Request(next_page_url, callback=self.parse)
+
+
     def parse_article_page(self, response):
         blog_article = BlogArticle()
         blog_article['title'] = response.css('article h1.single-title ::text').extract_first()
