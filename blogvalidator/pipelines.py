@@ -10,6 +10,8 @@ from .settings import IMAGES_STORE
 load_dotenv(find_dotenv())
 
 class SafeValidatorPipeline(object):
+    spider_name = ''
+
     def process_item(self, item, spider):
         result_images = []
         for image in item['images']:
@@ -22,6 +24,7 @@ class SafeValidatorPipeline(object):
         return item
 
     def open_spider(self, spider):
+        self.spider_name = spider.name
         p = dj_database_url.config()
         self.connection = psycopg2.connect(
             host=p['HOST'],
@@ -29,6 +32,7 @@ class SafeValidatorPipeline(object):
             dbname=p['NAME'],
             user=p['USER'],
             password=p['PASSWORD'])
+        self.connection.set_session(autocommit=True)
         self.cursor = self.connection.cursor()
 
     def close_spider(self, spider):
@@ -43,9 +47,9 @@ class SafeValidatorPipeline(object):
 
         sql = """
             INSERT INTO crawl_item
-                (name, url, violence, adult, spoof, medical, page_title, page_url)
+                (name, url, violence, adult, spoof, medical, site_name, page_title, page_url, created_at)
             VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s);
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         self.cursor.execute(sql, (
             image['path'],
@@ -54,6 +58,8 @@ class SafeValidatorPipeline(object):
             image['safe_result']['safeSearchAnnotation']['adult'],
             image['safe_result']['safeSearchAnnotation']['spoof'],
             image['safe_result']['safeSearchAnnotation']['medical'],
+            self.spider_name,
             item['title'],
             item['url'],
+            datetime.datetime.now(),
         ))
